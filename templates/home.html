@@ -1,0 +1,44 @@
+{% extends "index.html" %}
+{% load static %}
+{% block title %}Главная{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-bar">
+    <div class="profile-info">
+        <span class="user-icon">👤</span>
+        <span class="welcome">Вы вошли как <b>{{ user.username }}</b></span>
+    </div>
+    <a href="{% url 'logout' %}" class="logout-btn">Выйти</a>
+</div>
+
+<div class="vm-grid">
+    {% for access in accesses %}
+    <div class="vm-card">
+        {% if access.vm.image %}
+            <img src="{{ access.vm.image.url }}" alt="{{ access.vm.name }}" class="vm-image">
+        {% else %}
+            <div class="vm-image placeholder"></div>
+        {% endif %}
+
+        <div class="vm-title">{{ access.vm.name }}</div>
+
+        {% if access.vm.description %}
+        <div class="vm-desc">
+            {{ access.vm.description }}
+        </div>
+        {% endif %}
+
+        <div class="vm-buttons">
+            <a class="vm-btn-users" href="{% url 'vm_users' access.vm.id %}">
+                👥 ПОЛЬЗОВАТЕЛИ
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <p class="no-vm">У вас пока нет виртуальных машин.</p>
+    {% endfor %}
+</div>
+{% endblock %}

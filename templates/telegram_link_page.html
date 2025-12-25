@@ -1,0 +1,45 @@
+{% extends "index.html" %}
+{% load static %}
+{% block title %}Подтверждение Telegram{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="auth-title">Подтверждение через Telegram</div>
+
+    {% if tg_profile %}
+        <div class="auth-or" style="margin-top: 12px;">
+            ✅ Telegram привязан
+        </div>
+
+        <div class="auth-bottom" style="margin-top: 10px;">
+            chat_id: <b>{{ tg_profile.chat_id }}</b>
+        </div>
+
+        <a href="{% url 'home' %}" class="auth-btn" style="display:block; text-align:center; margin-top: 14px;">
+            Продолжить
+        </a>
+    {% else %}
+        <div class="auth-bottom" style="margin-top: 10px;">
+            Нажмите кнопку, откроется бот.
+            В Telegram нажмите <b>Start</b> — и аккаунт привяжется.
+        </div>
+
+        <a href="{% url 'telegram_link_start' %}" class="auth-btn" style="display:block; text-align:center; margin-top: 14px;">
+            Подтвердить через Telegram
+        </a>
+
+        <div class="auth-or">после подтверждения вернитесь сюда</div>
+
+        <a href="{% url 'telegram_link_page' %}" class="auth-btn" style="display:block; text-align:center; margin-top: 10px;">
+            Я подтвердил — проверить статус
+        </a>
+    {% endif %}
+
+    <div class="auth-bottom" style="margin-top: 14px;">
+        <a href="{% url 'logout' %}">Выйти</a>
+    </div>
+</div>
+{% endblock %}

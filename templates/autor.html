@@ -1,0 +1,48 @@
+{% extends "index.html" %}
+{% load static %}
+{% block title %}Авторизация{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="auth-title">Авторизация</div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% if error %}
+            <div class="auth-or" style="color:#ff5a5a; margin: 10px 0;">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <div class="auth-label">Имя пользователя</div>
+        <input class="auth-input" type="text" name="username"
+               value="{{ request.POST.username|default_if_none:'' }}"
+               placeholder="Введите имя пользователя" required>
+
+        <div class="auth-label">Пароль</div>
+        <input class="auth-input" type="password" name="password"
+               placeholder="Введите пароль" required>
+
+        <div class="auth-forgot"><a href="#">Забыли пароль?</a></div>
+
+        <button type="submit" class="auth-btn">Войти</button>
+    </form>
+
+    <div class="auth-or">или войдите через</div>
+
+    <div class="auth-socials">
+        <a href="#" class="fb">f</a>
+        <a href="#" class="tw">t</a>
+        <a href="#" class="gg">G</a>
+    </div>
+
+    <div class="auth-bottom">
+        Нет аккаунта?
+        <a href="{% url 'register' %}">Зарегистрироваться</a>
+    </div>
+</div>
+{% endblock %}

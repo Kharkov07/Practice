@@ -1,0 +1,179 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}Пользователи{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-bar">
+  <div class="profile-info">
+    <span class="user-icon">🖥️</span>
+    <span class="welcome">VM: <b>{{ vm.name }}</b></span>
+  </div>
+  <a href="{% url 'home' %}" class="logout-btn">Назад</a>
+</div>
+
+<div class="page-wrap">
+  <div class="form-card">
+    <div class="form-title">Добавить пользователя</div>
+
+    {% if error %}
+      <div class="form-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+
+      <div class="field">
+        <label class="label">Username</label>
+        <input class="input" type="text" name="username" placeholder="например: ivanov" required>
+      </div>
+
+      <div class="field">
+        <label class="label">Pass-фраза</label>
+        <div class="pwd-wrap">
+          <input id="pwd-new" class="input input-pwd" type="password" name="password8" placeholder="введите pass-фразу" required>
+          <button type="button" class="pwd-eye" aria-label="Показать пароль" onclick="togglePwd('pwd-new', this)">👁️</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Создать</button>
+    </form>
+  </div>
+
+  <div class="vm-grid">
+    {% for u in users %}
+    <div class="user-card">
+      <div class="user-top">
+        <div class="user-name">{{ u.username }}</div>
+
+        <div class="user-sub">
+          <span class="pwd-label">Пароль</span>
+
+          <div class="pwd-wrap-inline">
+            <span id="pwd-mask-{{ u.id }}" class="pwd-mask">••••••••</span>
+            <span id="pwd-real-{{ u.id }}" class="pwd-real hidden">{{ u.password8 }}</span>
+
+            <button type="button" class="pwd-eye small" onclick="toggleCardPwd({{ u.id }}, this)" aria-label="Показать пароль">👁️</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="user-actions">
+        <button type="button" class="btn-secondary" onclick="loadUserKey({{ u.id }}, 'pub', this)">PUBLIC KEY</button>
+        <button type="button" class="btn-secondary" onclick="loadUserKey({{ u.id }}, 'priv', this)">PRIVATE KEY</button>
+      </div>
+
+      <pre id="pub-{{ u.id }}" class="key-box hidden"></pre>
+      <pre id="priv-{{ u.id }}" class="key-box hidden"></pre>
+    </div>
+    {% empty %}
+      <p class="no-vm">Пользователей пока нет.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+//<![CDATA[
+function getCookie(name){
+  var value=null;
+  if(document.cookie && document.cookie!==""){
+    var cookies=document.cookie.split(";");
+    for(var i=0;i<cookies.length;i++){
+      var c=cookies[i].trim();
+      if(c.substring(0,name.length+1)===(name+"=")){
+        value=decodeURIComponent(c.substring(name.length+1));
+        break;
+      }
+    }
+  }
+  return value;
+}
+var csrftoken=getCookie("csrftoken");
+
+function loadUserKey(userId,keyType,btn){
+  var pre=document.getElementById(keyType+"-"+userId);
+  if(!pre || !btn) return;
+
+  var otherType=(keyType==="pub")?"priv":"pub";
+  var otherPre=document.getElementById(otherType+"-"+userId);
+
+  var actions=btn.parentNode;
+  var buttons=actions?actions.querySelectorAll("button"):[];
+  var otherBtn=null;
+  for(var i=0;i<buttons.length;i++){
+    var b=buttons[i];
+    if(b!==btn){ otherBtn=b; break; }
+  }
+
+  if(!pre.classList.contains("hidden")){
+    pre.classList.add("hidden");
+    btn.classList.remove("open");
+    return;
+  }
+
+  if(otherPre) otherPre.classList.add("hidden");
+  if(otherBtn) otherBtn.classList.remove("open");
+
+  if(pre.textContent.trim()!==""){
+    pre.classList.remove("hidden");
+    btn.classList.add("open");
+    return;
+  }
+
+  fetch("/vmuser/"+userId+"/key/"+keyType+"/",{
+    method:"POST",
+    headers:{
+      "X-CSRFToken":csrftoken,
+      "X-Requested-With":"XMLHttpRequest"
+    }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    pre.textContent=(data && data.key)?data.key:"Пустой ответ";
+    pre.classList.remove("hidden");
+    btn.classList.add("open");
+  })
+  .catch(function(){
+    pre.textContent="Ошибка при получении ключа";
+    pre.classList.remove("hidden");
+    btn.classList.add("open");
+  });
+}
+
+function togglePwd(inputId, btn){
+  var inp=document.getElementById(inputId);
+  if(!inp) return;
+  if(inp.type==="password"){
+    inp.type="text";
+    btn.textContent="🙈";
+    btn.setAttribute("aria-label","Скрыть пароль");
+  }else{
+    inp.type="password";
+    btn.textContent="👁️";
+    btn.setAttribute("aria-label","Показать пароль");
+  }
+}
+
+function toggleCardPwd(userId, btn){
+  var mask=document.getElementById("pwd-mask-"+userId);
+  var real=document.getElementById("pwd-real-"+userId);
+  if(!mask || !real) return;
+
+  if(real.classList.contains("hidden")){
+    real.classList.remove("hidden");
+    mask.classList.add("hidden");
+    btn.textContent="🙈";
+    btn.setAttribute("aria-label","Скрыть пароль");
+  }else{
+    real.classList.add("hidden");
+    mask.classList.remove("hidden");
+    btn.textContent="👁️";
+    btn.setAttribute("aria-label","Показать пароль");
+  }
+}
+//]]>
+</script>
+{% endblock %}

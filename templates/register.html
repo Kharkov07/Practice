@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+{% load static %}
+{% block title %}Регистрация{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="auth-title">Регистрация</div>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="auth-label">Имя пользователя</div>
+        {{ form.username.errors }}
+        <input class="auth-input" type="text"
+               name="{{ form.username.html_name }}"
+               placeholder="Введите имя пользователя"
+               value="{{ form.username.value|default_if_none:'' }}" required>
+
+        <div class="auth-label">Пароль</div>
+        {{ form.password1.errors }}
+        <input class="auth-input" type="password"
+               name="{{ form.password1.html_name }}"
+               placeholder="Введите пароль" required>
+
+        <div class="auth-label">Повторите пароль</div>
+        {{ form.password2.errors }}
+        <input class="auth-input" type="password"
+               name="{{ form.password2.html_name }}"
+               placeholder="Повторите пароль" required>
+
+        <button type="submit" class="auth-btn">Зарегистрироваться</button>
+    </form>
+
+    <div class="auth-bottom" style="margin-top: 14px;">
+        Уже есть аккаунт?
+        <a href="{% url 'autor' %}">Войти</a>
+    </div>
+</div>
+{% endblock %}
